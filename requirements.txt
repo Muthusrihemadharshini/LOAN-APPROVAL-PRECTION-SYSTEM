@@ -1,5 +1,5 @@
 streamlit
 scikit-learn
-random forest 
+randomforest 
 numpy
 pandas
