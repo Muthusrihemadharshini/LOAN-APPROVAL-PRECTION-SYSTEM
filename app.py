@@ -3,65 +3,54 @@ import numpy as np
 import pickle
 
 
-model = pickle.load(open("model.pkl", "rb"))
-scaler = pickle.load(open("scaler.pkl", "rb"))
-columns = pickle.load(open("columns.pkl", "rb"))
+import requests
+import pickle
+import io
 
 
 st.set_page_config(page_title="Loan Risk Predictor", layout="centered")
 
+def load_pickle_from_drive(file_id):
+    url = f"https://drive.google.com/uc?id={file_id}"
+    response = requests.get(url)
+    return pickle.load(io.BytesIO(response.content))
+
+@st.cache_resource
+def load_all():
+    model = load_pickle_from_drive("1Chqgz6LMnk25_21kGr_xYbU7HdvA9aBo")
+    scaler = load_pickle_from_drive("1KocsYONZ_2EHi6HiT7mfSrweDI0Tu7PJ")
+    columns = load_pickle_from_drive("1sJfyexY6DVNS7WHnglcMwm7Fyjog4AS_")
+    return model, scaler, columns
+
+model, scaler, columns = load_all()
 
 st.markdown("""
 <style>
-.stApp {
-    background-color: #f5f7fa;
+
+/* 🔘 BUTTON TEXT → FORCE WHITE */
+.stButton > button {
+    color: white !important;
 }
 
-/* ALL text = BLACK by default */
-.stApp, .stApp * {
-    color: #000000 !important;
+/* 🧠 DROPDOWN MENU (options list) */
+[data-baseweb="menu"] {
+    background-color: #1e1e1e !important;  /* dark bg */
 }
 
-.big-title {
-    font-size:30px;
-    font-weight:bold;
-    color: #000000 !important;
+/* Dropdown options text */
+[data-baseweb="menu"] * {
+    color: white !important;
 }
 
-/* Text INSIDE dark input/select boxes = WHITE */
-.stNumberInput input,
-.stNumberInput input::placeholder,
-.stNumberInput button,
-.stNumberInput button svg,
-.stSelectbox input,
-.stSelectbox [data-baseweb="select"] > div,
-.stSelectbox [data-baseweb="select"] > div * {
-    color: #ffffff !important;
-    fill: #ffffff !important;
+/* Selected + hover option */
+[data-baseweb="menu"] li:hover,
+[data-baseweb="menu"] li[aria-selected="true"] {
+    background-color: #333 !important;
+    color: white !important;
 }
 
-/* ONLY blue buttons and blue highlighted areas = WHITE text */
-.stButton > button,
-.stButton > button * {
-    color: #ffffff !important;
-}
-
-/* Blue notification/info boxes = WHITE text */
-[data-baseweb="notification"] *,
-.stInfo *,
-[data-testid="stAlert"] {
-    color: #ffffff !important;
-}
-
-/* Blue selected/highlighted UI = WHITE text */
-[data-baseweb="select"] [aria-selected="true"],
-[data-baseweb="menu"] [aria-selected="true"],
-[data-baseweb="tag"] {
-    color: #ffffff !important;
-}
 </style>
 """, unsafe_allow_html=True)
-
 
 st.markdown('<p class="big-title">🏦 Loan Default Prediction System</p>', unsafe_allow_html=True)
 st.write("Enter applicant details to assess loan risk")
